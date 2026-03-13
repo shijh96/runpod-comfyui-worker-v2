@@ -69,10 +69,8 @@ RUN rm -rf /comfyui/custom_nodes/ComfyUI-ZMG-Nodes && \
     git clone https://github.com/fq393/ComfyUI-ZMG-Nodes.git /comfyui/custom_nodes/ComfyUI-ZMG-Nodes && \
     pip install -r /comfyui/custom_nodes/ComfyUI-ZMG-Nodes/requirements.txt
 
-# S3 helper node for uploads
-RUN rm -rf /comfyui/custom_nodes/ComfyS3 && \
-    git clone https://github.com/TemryL/ComfyS3.git /comfyui/custom_nodes/ComfyS3 && \
-    pip install -r /comfyui/custom_nodes/ComfyS3/requirements.txt
+# ComfyS3: use the base image's pre-configured version.
+# Do NOT re-clone — the base image's ComfyS3 already reads RunPod's BUCKET_* env vars.
 
 # ---------------------------------------------------------------------------
 # Install C/C++ compiler and Python headers for torch.compile (inductor backend)
