@@ -8,7 +8,8 @@ FROM runpod/worker-comfyui:5.5.0-base
 ENV COMFY_HOME=/comfyui \
     HF_HOME=/opt/cache/huggingface \
     TRANSFORMERS_CACHE=/opt/cache/huggingface \
-    TORCH_HOME=/opt/cache/torch
+    TORCH_HOME=/opt/cache/torch \
+    HF_ENDPOINT=https://hf-mirror.com
 
 RUN mkdir -p "${HF_HOME}" "${TORCH_HOME}" \
   && chown -R root:root "${HF_HOME}" "${TORCH_HOME}"
@@ -17,11 +18,9 @@ RUN mkdir -p "${HF_HOME}" "${TORCH_HOME}" \
 # Pre-download diffusion models, LoRAs and encoders referenced by the workflow.
 # ---------------------------------------------------------------------------
 RUN comfy model download --url https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/InfiniteTalk/Wan2_1-InfiniTetalk-Single_fp16.safetensors --relative-path models/diffusion_models --filename Wan2_1-InfiniTetalk-Single_fp16.safetensors && \
-    comfy model download --url https://huggingface.co/852wa/ani_wan2.1/resolve/main/aniWan2114BFp8E4m3fn_i2v480pNew.safetensors --relative-path models/diffusion_models --filename aniWan2114BFp8E4m3fn_i2v480pNew.safetensors && \
     comfy model download --url https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_14B_fp8_e4m3fn.safetensors --relative-path models/diffusion_models --filename wan2.1_i2v_480p_14B_fp8_e4m3fn.safetensors && \
     comfy model download --url https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors --relative-path models/vae --filename wan_2.1_vae.safetensors && \
     comfy model download --url https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Lightx2v/lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors --relative-path models/loras --filename lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors && \
-    comfy model download --url https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/rCM/Wan_2_1_T2V_14B_480p_rCM_lora_average_rank_83_bf16.safetensors --relative-path models/loras --filename Wan_2_1_T2V_14B_480p_rCM_lora_average_rank_83_bf16.safetensors && \
     comfy model download --url https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors --relative-path models/clip_vision --filename clip_vision_h.safetensors && \
     comfy model download --url https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors --relative-path models/text_encoders --filename umt5-xxl-enc-bf16.safetensors
 
