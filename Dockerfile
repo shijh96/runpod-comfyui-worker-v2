@@ -20,6 +20,16 @@ RUN mkdir -p "${HF_HOME}" "${TORCH_HOME}" \
   && chown -R root:root "${HF_HOME}" "${TORCH_HOME}"
 
 # ---------------------------------------------------------------------------
+# Update ComfyUI core to exact version matching local (0.17.0, commit f6b869d7)
+# Base image has 0.3.64; we need 0.17.0 for consistent generation quality.
+# ---------------------------------------------------------------------------
+RUN cd /comfyui && \
+    git remote set-url origin https://github.com/comfyanonymous/ComfyUI.git && \
+    git fetch origin && \
+    git checkout f6b869d7 && \
+    pip install -r requirements.txt
+
+# ---------------------------------------------------------------------------
 # Pre-download models (each in separate RUN for Docker layer caching)
 # ---------------------------------------------------------------------------
 
@@ -97,29 +107,35 @@ ENV HF_HUB_OFFLINE=1 \
     TRANSFORMERS_OFFLINE=1
 
 # ---------------------------------------------------------------------------
-# Install custom nodes (only what the workflow needs)
-#
-# Kept:
-#   - ComfyUI-WanVideoWrapper:         all InfiniteTalk/MultiTalk/Wan nodes
-#   - comfyui-videohelpersuite:         VHS_LoadAudio, AudioCrop, VHS_VideoCombine
-#   - seedvr2_videoupscaler:            FlashVSRInitPipe, FlashVSRNodeAdv
-#   - comfyui_layerstyle:               LayerUtility: ImageScaleByAspectRatio V2
-#   - audio-separation-nodes-comfyui:   AudioCrop
-#   - set-soft/AudioSeparation:         AudioSeparateDemucs
+# Install custom nodes — pinned to exact versions matching local machine
+# Source: jiahe@100.84.91.125:/home/jiahe/workspace/ComfyUI/custom_nodes/
 # ---------------------------------------------------------------------------
-RUN comfy node install ComfyUI-WanVideoWrapper && \
-    comfy node install comfyui-videohelpersuite && \
-    comfy node install comfyui_layerstyle && \
-    comfy node install audio-separation-nodes-comfyui
 
-# FlashVSR Ultra Fast (from GitHub, same as production)
-# Provides: FlashVSRInitPipe, FlashVSRNodeAdv
+# WanVideoWrapper v1.4.7 (commit e091c4a) — all InfiniteTalk/MultiTalk/Wan nodes
+RUN git clone https://github.com/kijai/ComfyUI-WanVideoWrapper.git /comfyui/custom_nodes/ComfyUI-WanVideoWrapper && \
+    cd /comfyui/custom_nodes/ComfyUI-WanVideoWrapper && git checkout e091c4a && \
+    pip install -r requirements.txt
+
+# comfyui-videohelpersuite — VHS_LoadAudio, VHS_VideoCombine (registry, local is v1.6.1)
+RUN comfy node install comfyui-videohelpersuite
+
+# comfyui_layerstyle (commit d94bef1) — LayerUtility: ImageScaleByAspectRatio V2
+RUN git clone https://github.com/chflame163/ComfyUI_LayerStyle.git /comfyui/custom_nodes/comfyui_layerstyle && \
+    cd /comfyui/custom_nodes/comfyui_layerstyle && git checkout d94bef1 && \
+    pip install -r requirements.txt
+
+# audio-separation-nodes-comfyui — AudioCrop (registry, local is v1.4.0)
+RUN comfy node install audio-separation-nodes-comfyui
+
+# FlashVSR Ultra Fast (commit 4820b3f) — FlashVSRInitPipe, FlashVSRNodeAdv
 RUN rm -rf /comfyui/custom_nodes/ComfyUI-FlashVSR_Ultra_Fast && \
     git clone https://github.com/lihaoyun6/ComfyUI-FlashVSR_Ultra_Fast.git /comfyui/custom_nodes/ComfyUI-FlashVSR_Ultra_Fast && \
-    pip install -r /comfyui/custom_nodes/ComfyUI-FlashVSR_Ultra_Fast/requirements.txt
+    cd /comfyui/custom_nodes/ComfyUI-FlashVSR_Ultra_Fast && git checkout 4820b3f && \
+    pip install -r requirements.txt
 
-# set-soft/AudioSeparation node (AudioSeparateDemucs) with htdemucs_ft v4 support
+# set-soft/AudioSeparation v1.1.3 (commit 621bd27) — AudioSeparateDemucs
 RUN git clone https://github.com/set-soft/AudioSeparation.git /comfyui/custom_nodes/AudioSeparation && \
+    cd /comfyui/custom_nodes/AudioSeparation && git checkout 621bd27 && \
     pip install 'seconohe>=1.0.2'
 
 # ---------------------------------------------------------------------------
