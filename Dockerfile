@@ -109,9 +109,14 @@ ENV HF_HUB_OFFLINE=1 \
 # ---------------------------------------------------------------------------
 RUN comfy node install ComfyUI-WanVideoWrapper && \
     comfy node install comfyui-videohelpersuite && \
-    comfy node install seedvr2_videoupscaler && \
     comfy node install comfyui_layerstyle && \
     comfy node install audio-separation-nodes-comfyui
+
+# FlashVSR Ultra Fast (from GitHub, same as production)
+# Provides: FlashVSRInitPipe, FlashVSRNodeAdv
+RUN rm -rf /comfyui/custom_nodes/ComfyUI-FlashVSR_Ultra_Fast && \
+    git clone https://github.com/lihaoyun6/ComfyUI-FlashVSR_Ultra_Fast.git /comfyui/custom_nodes/ComfyUI-FlashVSR_Ultra_Fast && \
+    pip install -r /comfyui/custom_nodes/ComfyUI-FlashVSR_Ultra_Fast/requirements.txt
 
 # set-soft/AudioSeparation node (AudioSeparateDemucs) with htdemucs_ft v4 support
 RUN git clone https://github.com/set-soft/AudioSeparation.git /comfyui/custom_nodes/AudioSeparation && \
